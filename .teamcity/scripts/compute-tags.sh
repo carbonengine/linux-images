@@ -8,6 +8,7 @@
 #
 #   refs/tags/v2.2.0       -> 2.2.0-<sha>, 2.2.0, and 2.2 / 2 if it is the highest stable 2.2.x / 2.x.x
 #   refs/tags/v2.2.0-rc1   -> 2.2.0-rc1-<sha>, 2.2.0-rc1 (prereleases never roll 2.2 or 2)
+#   refs/pull/12/head      -> pr-12-<sha>
 #   default branch (main)  -> main-<sha> and latest
 #   any other branch       -> <branch>-<sha>
 set -euo pipefail
@@ -53,6 +54,10 @@ case "$ref" in
         else
             echo "$(sanitize "$name")-$sha"
         fi
+        ;;
+    refs/pull/*)
+        pr="${ref#refs/pull/}"
+        echo "pr-${pr%%/*}-$sha"
         ;;
     *)
         branch="${ref#refs/heads/}"

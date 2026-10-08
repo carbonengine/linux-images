@@ -16,13 +16,6 @@ context="$here/../../$context_dir"
 file="$context/$dockerfile"
 [[ -f "$file" ]] || { echo "Dockerfile not found: $file" >&2; exit 1; }
 
-# pull requests only verify that the image builds; nothing is pushed
-if [[ "$ref" == refs/pull/* ]]; then
-    pr="${ref#refs/pull/}"; pr="${pr%%/*}"
-    "$engine" build -f "$file" -t "$image:pr-$pr" "$context"
-    exit 0
-fi
-
 # the checkout only contains the triggering ref, so ask the remote for all existing tags
 existing_tags="$(git ls-remote --tags --refs origin | sed -E 's#.*refs/tags/##')"
 
