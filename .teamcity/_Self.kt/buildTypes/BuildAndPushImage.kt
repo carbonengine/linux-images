@@ -21,6 +21,9 @@ class BuildAndPushImage(variant: String) : BuildType({
     params {
         param("variant", variant)
         param("image_name", "carbon-linux-$variant")
+        /* build context relative to the repo root, and the Dockerfile name inside it (these images use the podman-style name) */
+        param("context_dir", "build/$variant")
+        param("dockerfile", "Containerfile")
         param("vcs_ref", "%teamcity.build.vcs.branch.${DslContext.settingsRootId}%")
         param("teamcity.vcsTrigger.runBuildInNewEmptyBranch", "true")
     }
@@ -37,12 +40,13 @@ class BuildAndPushImage(variant: String) : BuildType({
             scriptContent = """
                 set -euo pipefail
                 bash .teamcity/scripts/build-and-push.sh \
-                    "%variant%" \
                     "%image_name%" \
                     "%vcs_ref%" \
                     "%teamcity.build.branch.is_default%" \
                     "%build.vcs.number%" \
-                    "%ecr_registry%"
+                    "%ecr_registry%" \
+                    "%context_dir%" \
+                    "%dockerfile%"
             """.trimIndent()
         }
     }

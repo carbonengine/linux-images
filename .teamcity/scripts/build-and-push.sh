@@ -1,21 +1,25 @@
 #!/usr/bin/env bash
-# Builds build/<variant>/Containerfile and pushes it to ECR under every tag from compute-tags.sh.
+# Builds an image and pushes it to a registry under every tag from compute-tags.sh.
 #
-# usage: build-and-push.sh <variant> <image-name> <full-ref> <is-default> <sha> <ecr-registry>
+# usage: build-and-push.sh <image-name> <full-ref> <is-default> <sha> <registry> <context-dir> [dockerfile]
+#   context-dir   build context, relative to the repository root
+#   dockerfile    file name inside context-dir (default: Dockerfile)
 # The agent must already be logged in to the registry (TeamCity Docker Support build feature).
 set -euo pipefail
 
-variant="$1"; image="$2"; ref="$3"; is_default="$4"; sha="$5"
-registry="$6"
+image="$1"; ref="$2"; is_default="$3"; sha="$4"; registry="$5"
+context_dir="$6"; dockerfile="${7:-Dockerfile}"
 engine=docker
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-context="$here/../../build/$variant"
+context="$here/../../$context_dir"
+file="$context/$dockerfile"
+[[ -f "$file" ]] || { echo "Dockerfile not found: $file" >&2; exit 1; }
 
 # pull requests only verify that the image builds; nothing is pushed
 if [[ "$ref" == refs/pull/* ]]; then
     pr="${ref#refs/pull/}"; pr="${pr%%/*}"
-    "$engine" build -t "$image:pr-$pr" "$context"
+    "$engine" build -f "$file" -t "$image:pr-$pr" "$context"
     exit 0
 fi
 
@@ -31,7 +35,7 @@ for tag in "${tags[@]}"; do
     args+=(-t "$registry/$image:$tag")
 done
 
-"$engine" build "${args[@]}" "$context"
+"$engine" build -f "$file" "${args[@]}" "$context"
 
 for tag in "${tags[@]}"; do
     "$engine" push "$registry/$image:$tag"
