@@ -1,4 +1,4 @@
-linux-containers
+linux-images
 ---
 
 Containerfiles for building CARBON on Linux.
