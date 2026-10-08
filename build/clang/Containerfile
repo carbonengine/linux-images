@@ -36,6 +36,8 @@ ENV CC=clang
 ENV CXX=clang++
 ENV CMAKE_GENERATOR=Ninja
 
+RUN curl -sSL https://sentry.io/get-cli/ | SENTRY_CLI_VERSION="3.8.0" sh
+
 # ODBC driver
 RUN curl -sSL -O https://packages.microsoft.com/config/ubuntu/26.04/packages-microsoft-prod.deb \
     && dpkg -i packages-microsoft-prod.deb \
