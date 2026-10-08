@@ -5,21 +5,25 @@ package _Self.buildTypes
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.CheckoutMode
 import jetbrains.buildServer.configs.kotlin.DslContext
-import jetbrains.buildServer.configs.kotlin.buildFeatures.PullRequests
 import jetbrains.buildServer.configs.kotlin.buildFeatures.dockerSupport
-import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
 import jetbrains.buildServer.configs.kotlin.buildFeatures.sshAgent
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
-import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
-class BuildAndPushImage(variant: String) : BuildType({
-    id("BuildAndPush_$variant")
-    name = "Build and push carbon-linux-$variant"
+/**
+ * Builds one architecture of an image on a native agent and pushes it under the unique "<tag>-<arch>" tag.
+ * BuildAndPushManifest then stitches the per-architecture images into the final multi-arch tags.
+ *
+ * @param arch value of teamcity.agent.jvm.os.arch of the agent to build on ("amd64" or "aarch64"), also used as the tag suffix
+ */
+class BuildAndPushImage(variant: String, arch: String) : BuildType({
+    id("BuildAndPush_${variant}_$arch")
+    name = "Build and push carbon-linux-$variant ($arch)"
 
     enablePersonalBuilds = false
 
     params {
         param("variant", variant)
+        param("arch", arch)
         param("image_name", "carbon-linux-$variant")
         /* build context relative to the repo root, and the Dockerfile name inside it (these images use the podman-style name) */
         param("context_dir", "build/$variant")
@@ -46,31 +50,13 @@ class BuildAndPushImage(variant: String) : BuildType({
                     "%build.vcs.number%" \
                     "%ecr_registry%" \
                     "%context_dir%" \
-                    "%dockerfile%"
-            """.trimIndent()
-        }
-    }
-
-    triggers {
-        vcs {
-            branchFilter = """
-                +:<default>
-                +:v*
-                +:pull/*
+                    "%dockerfile%" \
+                    "%arch%"
             """.trimIndent()
         }
     }
 
     features {
-        pullRequests {
-            vcsRootExtId = "${DslContext.settingsRootId.id}"
-            provider = github {
-                authType = token {
-                    token = "%GITHUB_CARBON_PAT%"
-                }
-                filterAuthorRole = PullRequests.GitHubRoleFilter.EVERYBODY
-            }
-        }
         sshAgent {
             teamcitySshKey = "ccpgames-carbon"
         }
@@ -83,5 +69,7 @@ class BuildAndPushImage(variant: String) : BuildType({
 
     requirements {
         contains("teamcity.agent.jvm.os.name", "Linux")
+        noLessThanVer("env.FENRIS_AGENT_VERSION", "1.0.0")
+        equals("teamcity.agent.jvm.os.arch", arch)
     }
 })
