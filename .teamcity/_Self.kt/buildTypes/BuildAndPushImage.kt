@@ -76,7 +76,7 @@ class BuildAndPushImage(variant: String) : BuildType({
         }
         dockerSupport {
             loginToRegistry = on {
-                dockerRegistryId = "PROJECT_EXT_41"
+                dockerRegistryId = "PROJECT_EXT_156"
             }
         }
     }
