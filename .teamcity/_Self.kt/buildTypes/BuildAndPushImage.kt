@@ -83,5 +83,6 @@ class BuildAndPushImage(variant: String) : BuildType({
 
     requirements {
         contains("teamcity.agent.jvm.os.name", "Linux")
-    }
+        noLessThanVer("env.FENRIS_AGENT_VERSION", "1.0.0")
+        equals("teamcity.agent.jvm.os.arch", "amd64")
 })
