@@ -6,6 +6,7 @@ import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.CheckoutMode
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.FailureAction
+import jetbrains.buildServer.configs.kotlin.ReuseBuilds
 import jetbrains.buildServer.configs.kotlin.buildFeatures.PullRequests
 import jetbrains.buildServer.configs.kotlin.buildFeatures.dockerSupport
 import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
@@ -87,6 +88,7 @@ class BuildAndPushManifest(variant: String, archBuilds: List<BuildAndPushImage>,
     dependencies {
         archBuilds.forEach { archBuild ->
             snapshot(archBuild) {
+                reuseBuilds = ReuseBuilds.NO
                 onDependencyFailure = FailureAction.FAIL_TO_START
                 onDependencyCancel = FailureAction.CANCEL
             }
