@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     gdb \
     cmake \
     git \
+    openssh-client \
     ninja-build \
     python3 \
     # Clean up \
