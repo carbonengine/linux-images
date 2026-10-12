@@ -6,6 +6,7 @@ import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.CheckoutMode
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.buildFeatures.PullRequests
+import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildFeatures.dockerSupport
 import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
 import jetbrains.buildServer.configs.kotlin.buildFeatures.sshAgent
@@ -66,6 +67,14 @@ class BuildAndPushImage(variant: String, arch: String) : BuildType({
                     token = "%GITHUB_CARBON_PAT%"
                 }
                 filterAuthorRole = PullRequests.GitHubRoleFilter.EVERYBODY
+            }
+        }
+        commitStatusPublisher {
+            publisher = github {
+                githubUrl = "https://api.github.com"
+                authType = personalToken {
+                    token = "%GITHUB_CARBON_PAT%"
+                }
             }
         }
         sshAgent {
