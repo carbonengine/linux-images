@@ -39,6 +39,11 @@ ENV CMAKE_GENERATOR=Ninja
 
 RUN curl -sSL https://sentry.io/get-cli/ | SENTRY_CLI_VERSION="3.8.0" sh
 
+RUN curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o /tmp/awscliv2.zip \
+    && unzip -q /tmp/awscliv2.zip -d /tmp \
+    && /tmp/aws/install \
+    && rm -rf /tmp/awscliv2.zip /tmp/aws
+
 # ODBC driver
 RUN curl -sSL -O https://packages.microsoft.com/config/ubuntu/26.04/packages-microsoft-prod.deb \
     && dpkg -i packages-microsoft-prod.deb \
