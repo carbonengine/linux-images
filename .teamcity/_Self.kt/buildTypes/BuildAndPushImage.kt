@@ -5,7 +5,9 @@ package _Self.buildTypes
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.CheckoutMode
 import jetbrains.buildServer.configs.kotlin.DslContext
+import jetbrains.buildServer.configs.kotlin.buildFeatures.PullRequests
 import jetbrains.buildServer.configs.kotlin.buildFeatures.dockerSupport
+import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
 import jetbrains.buildServer.configs.kotlin.buildFeatures.sshAgent
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 
@@ -57,6 +59,15 @@ class BuildAndPushImage(variant: String, arch: String) : BuildType({
     }
 
     features {
+        pullRequests {
+            vcsRootExtId = "${DslContext.settingsRootId.id}"
+            provider = github {
+                authType = token {
+                    token = "%GITHUB_CARBON_PAT%"
+                }
+                filterAuthorRole = PullRequests.GitHubRoleFilter.EVERYBODY
+            }
+        }
         sshAgent {
             teamcitySshKey = "ccpgames-carbon"
         }
