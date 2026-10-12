@@ -50,7 +50,9 @@ RUN curl -sSL -O https://packages.microsoft.com/config/ubuntu/26.04/packages-mic
     && rm packages-microsoft-prod.deb
 RUN apt-get update && ACCEPT_EULA=Y apt-get install --no-install-recommends -yq msodbcsql18 mssql-tools18 unixodbc-dev && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-COPY ssh_known_hosts /etc/ssh/ssh_known_hosts
+RUN curl -fsSL https://api.github.com/meta \
+    | python3 -c 'import json,sys; print("\n".join("github.com " + k for k in json.load(sys.stdin)["ssh_keys"]))' \
+    > /etc/ssh/ssh_known_hosts
 
 ARG BUILD_UID=1001
 ARG BUILD_GID=1001
