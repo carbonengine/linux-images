@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     openssh-client \
     ninja-build \
     python3 \
+    libtool \
     # Clean up \
     && apt-get autoremove -y \
     && apt-get clean -y \
