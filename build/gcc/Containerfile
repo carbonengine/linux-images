@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     ninja-build \
     python3 \
     libtool \
+    libltdl-dev \
     # Clean up \
     && apt-get autoremove -y \
     && apt-get clean -y \
