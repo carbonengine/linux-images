@@ -35,9 +35,23 @@ ENV CMAKE_GENERATOR=Ninja
 
 RUN curl -sSL https://sentry.io/get-cli/ | SENTRY_CLI_VERSION="3.8.0" sh
 
+RUN curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o /tmp/awscliv2.zip \
+    && unzip -q /tmp/awscliv2.zip -d /tmp \
+    && /tmp/aws/install \
+    && rm -rf /tmp/awscliv2.zip /tmp/aws
+
 # ODBC driver
 RUN curl -sSL -O https://packages.microsoft.com/config/ubuntu/26.04/packages-microsoft-prod.deb \
     && dpkg -i packages-microsoft-prod.deb \
     && rm packages-microsoft-prod.deb
 RUN apt-get update && ACCEPT_EULA=Y apt-get install --no-install-recommends -yq msodbcsql18 mssql-tools18 unixodbc-dev && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
-RUN echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
+
+RUN curl -fsSL https://api.github.com/meta \
+    | python3 -c 'import json,sys; print("\n".join("github.com " + k for k in json.load(sys.stdin)["ssh_keys"]))' \
+    > /etc/ssh/ssh_known_hosts
+
+ARG BUILD_UID=1001
+ARG BUILD_GID=1001
+RUN groupadd --gid ${BUILD_GID} buildagent \
+    && useradd --uid ${BUILD_UID} --gid ${BUILD_GID} --create-home --shell /bin/bash buildagent
+ENV PATH="${PATH}:/opt/mssql-tools18/bin"
