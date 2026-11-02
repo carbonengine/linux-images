@@ -29,6 +29,9 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     python3-venv \
     libtool \
     libltdl-dev \
+    doxygen \
+    # graphviz required by doxygen
+    graphviz \
     # Clean up \
     && apt-get autoremove -y \
     && apt-get clean -y \
